@@ -2,9 +2,14 @@ import { z } from 'zod';
 
 export const TaskStatusSchema = z.enum(['TODO', 'IN_PROGRESS', 'DONE']);
 
+const CustomerSchema = z.string().min(1).max(200);
+const TaskTypeSchema = z.string().min(1).max(120);
+
 export const CreateTaskSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(10000).optional().nullable(),
+  customer: CustomerSchema.optional().nullable(),
+  taskType: TaskTypeSchema.optional().nullable(),
   status: TaskStatusSchema.optional(),
   priority: z.number().int().min(1).max(5).optional(),
   tags: z.array(z.string().min(1).max(50)).optional(),
@@ -24,6 +29,8 @@ export const AgentUpsertTaskSchema = z.object({
   externalId: z.string().min(1).max(200),
   title: z.string().min(1).max(200),
   description: z.string().max(10000).optional().nullable(),
+  customer: CustomerSchema.optional().nullable(),
+  taskType: TaskTypeSchema.optional().nullable(),
   status: TaskStatusSchema.optional(),
   priority: z.number().int().min(1).max(5).optional(),
   tags: z.array(z.string().min(1).max(50)).optional(),

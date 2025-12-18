@@ -9,13 +9,18 @@ type Ctx = { params: Promise<{ id: string }> };
 function buildDraft({
   taskTitle,
   taskDescription,
+  customer,
+  taskType,
   tone
 }: {
   taskTitle: string;
   taskDescription?: string | null;
+  customer?: string | null;
+  taskType?: string | null;
   tone: 'neutral' | 'friendly' | 'direct';
 }) {
-  const subject = `Update: ${taskTitle}`;
+  const subjectParts = [customer ? `${customer}` : null, taskTitle].filter(Boolean);
+  const subject = `Update: ${subjectParts.join(' — ')}`;
 
   const opener =
     tone === 'friendly'
@@ -35,6 +40,8 @@ function buildDraft({
     opener,
     '',
     `I wanted to share an update on: ${taskTitle}.`,
+    customer ? `Customer: ${customer}` : undefined,
+    taskType ? `Task type: ${taskType}` : undefined,
     taskDescription ? `\nContext:\n${taskDescription}` : undefined,
     '\nNext steps:',
     '- (fill in)\n',
@@ -68,6 +75,8 @@ export async function POST(req: Request, ctx: Ctx) {
   const draft = buildDraft({
     taskTitle: task.title,
     taskDescription: task.description,
+    customer: task.customer,
+    taskType: task.taskType,
     tone: parsed.tone ?? 'neutral'
   });
 

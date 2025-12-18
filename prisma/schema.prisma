@@ -17,6 +17,8 @@ model Task {
   id             String      @id @default(cuid())
   title          String
   description    String?
+  customer       String?
+  taskType       String?
   status         TaskStatus  @default(TODO)
   priority       Int         @default(3)
   tagsJson       String      @default("[]")
@@ -31,6 +33,8 @@ model Task {
   @@unique([externalSource, externalId])
   @@index([status])
   @@index([createdAt])
+  @@index([customer])
+  @@index([taskType])
 }
 
 model EmailDraft {

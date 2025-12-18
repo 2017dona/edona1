@@ -21,6 +21,8 @@ export async function POST(req: Request) {
       externalId: parsed.externalId,
       title: parsed.title,
       description: parsed.description ?? undefined,
+      customer: parsed.customer ?? undefined,
+      taskType: parsed.taskType ?? undefined,
       status: parsed.status,
       priority: parsed.priority,
       tagsJson: tagsToJson(parsed.tags),
@@ -29,6 +31,8 @@ export async function POST(req: Request) {
     update: {
       title: parsed.title,
       description: parsed.description ?? undefined,
+      customer: parsed.customer ?? undefined,
+      taskType: parsed.taskType ?? undefined,
       status: parsed.status,
       priority: parsed.priority,
       tagsJson: parsed.tags ? tagsToJson(parsed.tags) : undefined,

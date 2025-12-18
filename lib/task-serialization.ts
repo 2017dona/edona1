@@ -16,6 +16,8 @@ export function serializeTask(task: TaskWithDrafts) {
     id: task.id,
     title: task.title,
     description: task.description,
+    customer: task.customer,
+    taskType: task.taskType,
     status: task.status,
     priority: task.priority,
     tags: safeParseJsonArray(task.tagsJson),

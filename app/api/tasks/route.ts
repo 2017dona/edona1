@@ -20,6 +20,8 @@ export async function POST(req: Request) {
   const data: Parameters<typeof prisma.task.create>[0]['data'] = {
     title: parsed.title,
     description: parsed.description ?? undefined,
+    customer: parsed.customer ?? undefined,
+    taskType: parsed.taskType ?? undefined,
     tagsJson: tagsToJson(parsed.tags),
     metadata: parsed.metadata as Prisma.InputJsonValue
   };

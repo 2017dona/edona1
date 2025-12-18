@@ -27,6 +27,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (typeof parsed.title === 'string') data.title = parsed.title;
   if (parsed.description !== undefined)
     data.description = parsed.description === null ? null : parsed.description;
+  if (parsed.customer !== undefined)
+    data.customer = parsed.customer === null ? null : parsed.customer;
+  if (parsed.taskType !== undefined)
+    data.taskType = parsed.taskType === null ? null : parsed.taskType;
   if (parsed.status) data.status = parsed.status;
   if (typeof parsed.priority === 'number') data.priority = parsed.priority;
   if (parsed.tags) data.tagsJson = tagsToJson(parsed.tags);
