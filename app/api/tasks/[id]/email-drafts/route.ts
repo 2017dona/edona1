@@ -19,7 +19,9 @@ function buildDraft({
   taskType?: string | null;
   tone: 'neutral' | 'friendly' | 'direct';
 }) {
-  const subjectParts = [customer ? `${customer}` : null, taskTitle].filter(Boolean);
+  const subjectParts = [customer, taskTitle, taskType].filter(
+    (v): v is string => typeof v === 'string' && v.trim().length > 0
+  );
   const subject = `Update: ${subjectParts.join(' — ')}`;
 
   const opener =
