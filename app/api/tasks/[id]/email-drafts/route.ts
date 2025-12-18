@@ -71,13 +71,16 @@ export async function POST(req: Request, ctx: Ctx) {
   const body = await req.json();
   const parsed = CreateEmailDraftSchema.parse(body);
 
-  const task = await prisma.task.findUnique({ where: { id } });
+  const task = await prisma.task.findUnique({
+    where: { id },
+    include: { customerEntity: true }
+  });
   if (!task) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const draft = buildDraft({
     taskTitle: task.title,
     taskDescription: task.description,
-    customer: task.customer,
+    customer: task.customerEntity?.name ?? task.customer,
     taskType: task.taskType,
     tone: parsed.tone ?? 'neutral'
   });

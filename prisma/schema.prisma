@@ -13,11 +13,26 @@ enum TaskStatus {
   DONE
 }
 
+model Customer {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  notes      String?  // freeform customer notes (calls, preferences, context)
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tasks Task[]
+
+  @@index([createdAt])
+}
+
 model Task {
   id             String      @id @default(cuid())
   title          String
   description    String?
   customer       String?
+  customerId     String?
+  customerEntity Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
   taskType       String?
   status         TaskStatus  @default(TODO)
   priority       Int         @default(3)
@@ -34,6 +49,7 @@ model Task {
   @@index([status])
   @@index([createdAt])
   @@index([customer])
+  @@index([customerId])
   @@index([taskType])
 }
 

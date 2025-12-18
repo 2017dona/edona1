@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
+import { upsertCustomerByName } from '@/lib/customer-utils';
 import { serializeTask, tagsToJson } from '@/lib/task-serialization';
 import { UpdateTaskSchema } from '@/lib/validators';
 
@@ -11,7 +12,10 @@ export async function GET(_req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const task = await prisma.task.findUnique({
     where: { id },
-    include: { emailDrafts: { orderBy: { createdAt: 'desc' } } }
+    include: {
+      customerEntity: true,
+      emailDrafts: { orderBy: { createdAt: 'desc' } }
+    }
   });
 
   if (!task) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -27,6 +31,8 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (typeof parsed.title === 'string') data.title = parsed.title;
   if (parsed.description !== undefined)
     data.description = parsed.description === null ? null : parsed.description;
+  if (parsed.customerId !== undefined)
+    data.customerId = parsed.customerId === null ? null : parsed.customerId;
   if (parsed.customer !== undefined)
     data.customer = parsed.customer === null ? null : parsed.customer;
   if (parsed.taskType !== undefined)
@@ -37,9 +43,19 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (parsed.metadata !== undefined)
     data.metadata = parsed.metadata as Prisma.InputJsonValue;
 
+  if (
+    data.customerId === undefined &&
+    typeof parsed.customer === 'string' &&
+    parsed.customer.trim()
+  ) {
+    const c = await upsertCustomerByName(parsed.customer);
+    if (c) data.customerId = c.id;
+  }
+
   const updated = await prisma.task.update({
     where: { id },
-    data
+    data,
+    include: { customerEntity: true }
   });
 
   return NextResponse.json(serializeTask(updated));

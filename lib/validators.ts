@@ -8,6 +8,7 @@ const TaskTypeSchema = z.string().min(1).max(120);
 export const CreateTaskSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(10000).optional().nullable(),
+  customerId: z.string().min(1).max(64).optional().nullable(),
   customer: CustomerSchema.optional().nullable(),
   taskType: TaskTypeSchema.optional().nullable(),
   status: TaskStatusSchema.optional(),
@@ -29,6 +30,7 @@ export const AgentUpsertTaskSchema = z.object({
   externalId: z.string().min(1).max(200),
   title: z.string().min(1).max(200),
   description: z.string().max(10000).optional().nullable(),
+  customerId: z.string().min(1).max(64).optional().nullable(),
   customer: CustomerSchema.optional().nullable(),
   taskType: TaskTypeSchema.optional().nullable(),
   status: TaskStatusSchema.optional(),

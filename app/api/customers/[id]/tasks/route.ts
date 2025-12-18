@@ -2,33 +2,30 @@ import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
-import { upsertCustomerByName } from '@/lib/customer-utils';
 import { serializeTask, tagsToJson } from '@/lib/task-serialization';
 import { CreateTaskSchema } from '@/lib/validators';
 
-export async function GET() {
+type Ctx = { params: Promise<{ id: string }> };
+
+export async function GET(_req: Request, ctx: Ctx) {
+  const { id } = await ctx.params;
   const tasks = await prisma.task.findMany({
+    where: { customerId: id },
     include: { customerEntity: true },
     orderBy: { createdAt: 'desc' }
   });
-
   return NextResponse.json(tasks.map((t) => serializeTask(t)));
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request, ctx: Ctx) {
+  const { id } = await ctx.params;
   const body = await req.json();
   const parsed = CreateTaskSchema.parse(body);
-
-  const customerId =
-    parsed.customerId ??
-    (parsed.customer ? (await upsertCustomerByName(parsed.customer))?.id : null);
 
   const data: Parameters<typeof prisma.task.create>[0]['data'] = {
     title: parsed.title,
     description: parsed.description ?? undefined,
-    customerId: customerId ?? undefined,
-    // keep legacy string field for backward compatibility / easier exports
-    customer: parsed.customer ?? undefined,
+    customerId: id,
     taskType: parsed.taskType ?? undefined,
     tagsJson: tagsToJson(parsed.tags),
     metadata: parsed.metadata as Prisma.InputJsonValue
@@ -37,7 +34,10 @@ export async function POST(req: Request) {
   if (parsed.status) data.status = parsed.status;
   if (typeof parsed.priority === 'number') data.priority = parsed.priority;
 
-  const created = await prisma.task.create({ data, include: { customerEntity: true } });
+  const created = await prisma.task.create({
+    data,
+    include: { customerEntity: true }
+  });
 
   return NextResponse.json(serializeTask(created), { status: 201 });
 }

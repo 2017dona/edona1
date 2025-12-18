@@ -1,6 +1,9 @@
-import type { EmailDraft, Task } from '@prisma/client';
+import type { Customer, EmailDraft, Task } from '@prisma/client';
 
-export type TaskWithDrafts = Task & { emailDrafts?: EmailDraft[] };
+export type TaskWithDrafts = Task & {
+  emailDrafts?: EmailDraft[];
+  customerEntity?: Customer | null;
+};
 
 function safeParseJsonArray(value: string): string[] {
   try {
@@ -12,11 +15,13 @@ function safeParseJsonArray(value: string): string[] {
 }
 
 export function serializeTask(task: TaskWithDrafts) {
+  const customerName = task.customerEntity?.name ?? task.customer ?? null;
   return {
     id: task.id,
     title: task.title,
     description: task.description,
-    customer: task.customer,
+    customerId: task.customerId ?? null,
+    customer: customerName,
     taskType: task.taskType,
     status: task.status,
     priority: task.priority,
