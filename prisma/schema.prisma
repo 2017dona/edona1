@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model Task {
+  id             String      @id @default(cuid())
+  title          String
+  description    String?
+  status         TaskStatus  @default(TODO)
+  priority       Int         @default(3)
+  tagsJson       String      @default("[]")
+  metadata       Json?
+  externalSource String?
+  externalId     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  emailDrafts EmailDraft[]
+
+  @@unique([externalSource, externalId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model EmailDraft {
+  id        String   @id @default(cuid())
+  taskId    String
+  to        String
+  cc        String?
+  subject   String
+  body      String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([createdAt])
+}
